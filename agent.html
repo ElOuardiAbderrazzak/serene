@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SERENE Support console</title>
+<meta name="theme-color" content="#141a21">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/features.css">
+<style>
+  body { background:var(--n50); }
+  [hidden] { display:none !important; }   /* beats the display:flex below */
+  .console { display:flex; flex-direction:column; min-height:100vh; }
+  .console-top {
+    display:flex; align-items:center; gap:14px; padding:14px 28px; background:var(--n900); color:var(--n0);
+  }
+  .console-top .titles { flex:1; min-width:0; }
+  .console-top .titles b { display:block; font-size:15px; font-weight:500; }
+  .console-top .titles span { font-size:13px; color:var(--n400); }
+  .console-top .me { display:flex; align-items:center; gap:10px; }
+  .console-top .me .stack { text-align:right; }
+  .console-top .me .stack b { display:block; font-size:13px; font-weight:500; }
+  .console-top .me .stack span { font-size:13px; color:var(--n400); }
+  .chip-dark { background:var(--n800); border:1px solid var(--n700); color:var(--n0); }
+
+  .console-body { flex:1; display:flex; min-height:0; }
+  .console-main { flex:1; min-width:0; padding:28px; display:flex; flex-direction:column; gap:16px; }
+  .console-side { width:340px; flex:0 0 340px; background:var(--n0); border-left:1px solid var(--n200);
+                  display:flex; flex-direction:column; }
+
+  .stage { flex:1; background:var(--n100); padding:20px; display:flex; min-height:0; }
+  .viewer { flex:1; border-radius:16px; background:var(--n900); position:relative; overflow:hidden; display:grid; place-items:center; }
+  .viewer video { width:100%; height:100%; object-fit:contain; background:#000; }
+  .viewer .idle { color:var(--n400); text-align:center; display:grid; gap:10px; justify-items:center; padding:32px; }
+  .viewer-chip { position:absolute; left:16px; top:16px; display:inline-flex; align-items:center; gap:7px;
+                 padding:7px 12px; border-radius:var(--r-full); background:var(--n900); border:1px solid var(--n700);
+                 color:var(--n0); font-size:13px; font-weight:500; }
+  .viewer-ctl { position:absolute; right:16px; top:16px; display:flex; gap:8px; }
+  .viewer-ctl button { width:36px; height:36px; border-radius:10px; background:var(--n800);
+                       border:1px solid var(--n700); color:var(--n0); display:grid; place-items:center; }
+  .viewer-note { position:absolute; left:16px; bottom:16px; display:inline-flex; align-items:center; gap:9px;
+                 padding:10px 14px; border-radius:var(--r-full); background:var(--n800); border:1px solid var(--n700);
+                 color:var(--n0); font-size:13px; font-weight:500; }
+  .viewer-note svg { color:var(--ok); }
+
+  .side-pad { padding:24px; display:flex; flex-direction:column; gap:12px; align-items:center; text-align:center; }
+  .side-sec { padding:20px 24px; display:flex; flex-direction:column; gap:10px; }
+  .side-sec.center { align-items:center; }
+  .notes { padding:12px 14px; border-radius:12px; background:var(--n50); border:1px solid var(--n200);
+           font:inherit; font-size:13px; color:var(--n600); width:100%; min-height:92px; resize:vertical; }
+  @media (max-width:1100px) {
+    .console-body { flex-direction:column; }
+    .console-side { width:auto; flex:1 1 auto; border-left:none; border-top:1px solid var(--n200); }
+    .stage { min-height:46vh; }
+  }
+</style>
+</head>
+<body>
+
+<div class="console">
+  <header class="console-top">
+    <span class="avatar avatar-sm" style="background:var(--b600)">S</span>
+    <div class="titles"><b>SERENE Support console</b><span>Ontex technical support</span></div>
+    <span class="chip chip-dark"><i class="dot" style="background:var(--ok)"></i>Available</span>
+    <div class="me">
+      <div class="stack"><b>Tom Verbeke</b><span>Specialist</span></div>
+      <span class="avatar avatar-sm" style="background:var(--b600)">TV</span>
+    </div>
+  </header>
+
+  <!-- ============ QUEUE ============ -->
+  <section class="console-body" id="view-queue">
+    <div class="console-main">
+      <div class="section-head">
+        <h2 class="t-h1">Waiting</h2>
+        <span class="chip chip-brand" id="queue-count">0 in queue</span>
+      </div>
+      <p class="t-sm muted">Joining starts the audio call and opens the caller's screen if sharing is on.</p>
+
+      <div class="card card-pad" style="display:flex;flex-direction:column;gap:14px;max-width:560px">
+        <div class="roomcode-wrap">
+          <label for="code">Room code from the caller</label>
+          <input class="field" id="code" placeholder="e.g. 7K2M9P" autocomplete="off"
+                 maxlength="8" style="text-transform:uppercase;letter-spacing:.2em;font-size:19px">
+        </div>
+        <button class="btn btn-primary" id="join">Join call</button>
+        <span class="conn-state" id="state"><i class="dot"></i>Idle</span>
+      </div>
+
+      <div class="card card-pad" style="max-width:560px;background:var(--warn-t);border-color:transparent">
+        <b class="t-sm-sb">This prototype has no server of its own</b>
+        <p class="t-sm dim" style="margin-top:6px">In the real product a caller would appear in this
+          queue automatically. Here the caller reads you their room code, which is how the two
+          browsers find each other.</p>
+      </div>
+    </div>
+
+    <aside class="console-side">
+      <div class="side-sec">
+        <b class="t-h4">Today</b>
+        <div class="card card-pad" style="display:flex;align-items:center;gap:8px">
+          <span class="t-sm muted" style="flex:1">Calls handled</span><b class="t-h3">7</b></div>
+        <div class="card card-pad" style="display:flex;align-items:center;gap:8px">
+          <span class="t-sm muted" style="flex:1">Average wait</span><b class="t-h3">1:50</b></div>
+        <div class="card card-pad" style="display:flex;align-items:center;gap:8px">
+          <span class="t-sm muted" style="flex:1">Average call</span><b class="t-h3">5:30</b></div>
+        <div class="card card-pad" style="background:var(--warn-t);border-color:transparent">
+          <b class="t-sm-sb">Screen sharing is the caller's choice</b>
+          <p class="t-sm dim" style="margin-top:6px">When it is off you get audio only. You can ask
+            them to turn it on from their call bar.</p>
+        </div>
+      </div>
+    </aside>
+  </section>
+
+  <!-- ============ IN CALL ============ -->
+  <section class="console-body" id="view-call" hidden>
+    <div class="stage">
+      <div class="viewer">
+        <video id="remote" autoplay playsinline></video>
+        <div class="idle" id="viewer-idle" hidden>
+          <span style="opacity:.6">No picture</span>
+          <span class="t-sm">The caller chose not to share their screen. Audio only.</span>
+        </div>
+        <span class="viewer-chip"><i class="dot" style="background:var(--danger)"></i>
+          <span id="caller-label">Caller's screen — live</span></span>
+        <div class="viewer-ctl">
+          <button id="pip" aria-label="Picture in picture"></button>
+          <button id="full" aria-label="Fullscreen"></button>
+        </div>
+        <span class="viewer-note" id="mask-note"></span>
+      </div>
+    </div>
+
+    <aside class="console-side">
+      <div class="side-pad">
+        <span class="avatar avatar-xl" style="background:var(--b600)" id="caller-initials">AV</span>
+        <div><div class="t-h3" id="caller-name">Caller</div>
+          <div class="t-sm muted" id="caller-org">Room <span id="caller-room">—</span></div></div>
+        <span class="chip">Connected</span>
+      </div>
+      <div class="divider"></div>
+      <div class="side-sec center">
+        <div class="t-metric" id="timer">00:00</div>
+        <span class="t-sm muted">audio connected</span>
+        <div style="display:flex;gap:10px;margin-top:6px">
+          <button class="icon-btn" id="mic" aria-label="Mute" style="width:48px;height:48px"></button>
+          <button class="btn btn-danger" id="end">End call</button>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="side-sec">
+        <b class="t-sm-sb">Call notes</b>
+        <textarea class="notes" placeholder="What the caller is trying to do, and what you changed…"></textarea>
+      </div>
+      <div class="side-sec">
+        <button class="btn btn-ghost btn-block">Send a help article</button>
+      </div>
+    </aside>
+  </section>
+</div>
+
+<!-- ============ WRAP-UP ============ -->
+<div class="scrim" id="wrap-scrim"></div>
+<section class="sheet" id="wrap" role="dialog" aria-label="Call wrap-up">
+  <header class="sheet-head">
+    <span class="sheet-badge" style="background:var(--ok-t);color:var(--ok)" id="wrap-tick"></span>
+    <div class="titles"><h3>Call ended</h3><p id="wrap-sub">—</p></div>
+  </header>
+  <div class="sheet-body">
+    <div class="roomcode-wrap">
+      <label>Category</label>
+      <select class="field"><option>Inventory — stock count</option><option>Orders</option>
+        <option>Item lists</option><option>Invoices and access</option><option>Something else</option></select>
+    </div>
+    <div class="roomcode-wrap">
+      <label>Resolution</label>
+      <textarea class="notes" placeholder="What fixed it"></textarea>
+    </div>
+    <div class="setting" style="padding:14px 16px;background:var(--n50);border-radius:12px">
+      <div class="setting-main"><div class="t-body-m">Follow-up needed</div>
+        <div class="t-sm muted">Opens a task for the account manager</div></div>
+      <button class="switch" id="followup" role="switch" aria-checked="false"><span></span></button>
+    </div>
+  </div>
+  <footer class="sheet-foot">
+    <button class="btn btn-ghost" id="wrap-save">Save</button>
+    <button class="btn btn-primary" id="wrap-next">Save and take next</button>
+  </footer>
+</section>
+
+<script src="js/peerjs.min.js"></script>
+<script src="js/data.js"></script>
+<script src="js/agent.js"></script>
+</body>
+</html>
