@@ -54,8 +54,11 @@ function shell() {
         <h1 id="page-title"></h1><p id="page-sub"></p>
       </div>
       <button class="btn btn-primary btn-sm" id="call-support-desktop"
-        style="border-radius:999px">${icon('phone', 16)} Call support</button>
-      <button class="icon-btn" aria-label="Notifications">${icon('bell', 18)}</button>
+        style="border-radius:999px"
+        ${guide('Call a specialist', 'Starts an audio call with Ontex support. You choose whether to share your screen, and patient data is hidden before anything is sent.')}>
+        ${icon('phone', 16)} Call support</button>
+      <button class="icon-btn" aria-label="Notifications"
+        ${guide('Notifications', 'Low stock, orders awaiting approval and visits that were not completed show up here.')}>${icon('bell', 18)}</button>
       <a class="user-chip" href="#/account">
         ${meAvatar('sm')}
         <span class="cell-stack not-mobile">
@@ -105,8 +108,8 @@ const Screens = {
     const alerts = INVENTORY.filter(i => i.stock < i.min).slice(0, 4);
     return `
     <div class="stat-grid">
-      ${STATS.map(s => `
-        <div class="stat">
+      ${STATS.map((s, i) => `
+        <div class="stat" ${i === 0 ? guide('Your day at a glance', 'These four numbers refresh as the day goes. Anything in orange or red needs a decision from you.') : ''}>
           <div class="stat-label">${icon(s.icon, 16)}<span class="t-cap">${s.label}</span></div>
           <div class="stat-value t-metric">${s.value}</div>
           <div class="stat-foot" style="color:var(--${s.footClass === 'warn' ? 'warn' : s.footClass === 'danger' ? 'danger' : 'n500'})">${s.foot}</div>
@@ -143,8 +146,8 @@ const Screens = {
       <section class="section">
         <div class="section-head"><h2>Today's visits</h2><span class="t-sm muted">8 scheduled</span></div>
         <div class="list">
-          ${VISITS.slice(0, 4).map(v => { const p = patientById(v.patient); return `
-            <div class="row">
+          ${VISITS.slice(0, 4).map((v, i) => { const p = patientById(v.patient); return `
+            <div class="row" ${i === 0 ? guide("Today's round", 'Visits are listed in time order. Open one to tick off the products you used, which also updates the stock count.') : ''}>
               <b class="t-body-m" style="color:var(--b700);flex:0 0 46px">${v.time}</b>
               ${pAvatar(p, 'md')}
               <div class="row-main">
@@ -159,8 +162,8 @@ const Screens = {
       <section class="section">
         <div class="section-head"><h2>Stock alerts</h2><a class="link" href="#/inventory">${alerts.length} items</a></div>
         <div class="list">
-          ${alerts.map(a => `
-            <div class="row ${absClass(a.level)}">
+          ${alerts.map((a, i) => `
+            <div class="row ${absClass(a.level)}" ${i === 0 ? guide('Stock running low', 'An item appears here once it drops below its minimum. The coloured edge is the absorbency level, the same code used everywhere in SERENE.') : ''}>
               <div class="row-main">
                 <div class="row-title">${a.name}</div>
                 <div class="row-sub">${a.stock} left</div>
@@ -177,11 +180,12 @@ const Screens = {
     const rows = PATIENTS.filter(p => !q || p.name.toLowerCase().includes(q) || p.room.includes(q));
     return `
     <div class="toolbar">
-      <label class="search">${icon('search', 18)}
+      <label class="search" ${guide('Find a patient fast', 'Type part of a name or just the room number. The list filters as you type, so there is no search button to press.')}>${icon('search', 18)}
         <input type="search" placeholder="Search patients by name or room"
           value="${state.query}" oninput="App.search(this.value)">
       </label>
-      <button class="icon-btn" aria-label="Filter">${icon('filter', 18)}</button>
+      <button class="icon-btn" aria-label="Filter"
+        ${guide('Narrow the list', 'Filter by absorbency level, primary nurse or visit status when the full list gets long.')}>${icon('filter', 18)}</button>
       <button class="btn btn-primary btn-sm" style="border-radius:999px"
         ${guide('Add a patient', 'Creates the record and the first item list in one step. You need the room number and the prescribed absorbency.')}>
         ${icon('plus', 16)} Add patient</button>
@@ -192,8 +196,8 @@ const Screens = {
         <th>Patient</th><th>Next visit</th><th>Primary nurse</th><th>Item list</th><th>Status</th><th></th>
       </tr></thead>
       <tbody>
-        ${rows.map(p => `
-          <tr class="${absClass(p.level)}">
+        ${rows.map((p, i) => `
+          <tr class="${absClass(p.level)}" ${i === 0 ? guide('Open a patient', 'A row opens the full record: item list, visit history and the prescribed absorbency. The coloured left edge tells you that level at a glance.') : ''}>
             <td class="td-label" data-label="Patient">
               <div class="cell-main">${pAvatar(p, 'md')}
                 <div class="cell-stack">
@@ -231,14 +235,15 @@ const Screens = {
             ${d}${i < 3 ? '' : ''}</button>`).join('')}
       </div>
       <div style="flex:1"></div>
-      <button class="btn btn-ghost btn-sm">${icon('plus', 16)} Add visit</button>
+      <button class="btn btn-ghost btn-sm"
+        ${guide('Book a visit', 'Adds a one-off visit outside the standing round, for example after a change in a care plan.')}>${icon('plus', 16)} Add visit</button>
     </div>
 
     <section class="section">
       <div class="section-head"><h2>Thursday 20 November</h2><span class="t-sm muted">8 visits, 2 completed</span></div>
       <div class="list">
-        ${VISITS.map(v => { const p = patientById(v.patient); return `
-          <div class="row ${absClass(p.level)}">
+        ${VISITS.map((v, i) => { const p = patientById(v.patient); return `
+          <div class="row ${absClass(p.level)}" ${i === 0 ? guide('Complete a visit', 'Opening a visit lets you record what was used. That writes straight to the stock count, so you never log the same thing twice.') : ''}>
             <b class="t-body-m" style="color:var(--b700);flex:0 0 46px">${v.time}</b>
             ${pAvatar(p, 'md')}
             <div class="row-main">
@@ -255,7 +260,7 @@ const Screens = {
   orders() {
     return `
     <div class="toolbar">
-      <label class="search">${icon('search', 18)}
+      <label class="search" ${guide('Find an order', 'Search by the order number on the delivery note, or by month to see everything in a period.')}>${icon('search', 18)}
         <input type="search" placeholder="Search by order number"></label>
       <button class="btn btn-primary btn-sm" style="border-radius:999px"
         ${guide('Start a new order', 'Orders are built from the item lists of the patients you choose, so quantities are filled in for you.')}>
@@ -265,8 +270,8 @@ const Screens = {
     <table class="table">
       <thead><tr><th>Order</th><th>Date</th><th>Lines</th><th>Units</th><th>Total</th><th>Status</th></tr></thead>
       <tbody>
-        ${ORDERS.map(o => `
-          <tr>
+        ${ORDERS.map((o, i) => `
+          <tr ${i === 0 ? guide('Track an order', 'Pending means it is still with your administrator. Approved means it has gone to Ontex and the delivery date is set.') : ''}>
             <td class="td-label" data-label="Order"><b class="t-body-m">${o.id}</b></td>
             <td class="td-label" data-label="Date">${o.date}</td>
             <td class="td-label" data-label="Lines">${o.lines}</td>
@@ -305,7 +310,7 @@ const Screens = {
         </div>
         <div class="card">
           ${sel.items.map((it, i) => { const pr = productById(it.p); return `
-            <div class="setting">
+            <div class="setting" ${i === 0 ? guide('Change a product or quantity', 'Per day is what gets ordered for this patient. Adjust it here and the next order picks up the new number automatically.') : ''}>
               <span class="avatar avatar-md ${absClass(pr.level)}"
                 style="background:var(--t);color:var(--n700);font-size:11px">${pr.range[0]}</span>
               <div class="setting-main">
@@ -323,7 +328,7 @@ const Screens = {
   inventory() {
     return `
     <div class="toolbar">
-      <label class="search">${icon('search', 18)}
+      <label class="search" ${guide('Find stock', 'Search by product name or range. The store location is shown on every row so you know which shelf to go to.')}>${icon('search', 18)}
         <input type="search" placeholder="Search stock by product"></label>
       <button class="btn btn-primary btn-sm" style="border-radius:999px"
         ${guide('Record new stock', 'Scan or type what arrived. The count updates straight away and clears the low-stock alert.')}>
@@ -333,11 +338,11 @@ const Screens = {
     <table class="table">
       <thead><tr><th>Product</th><th>Location</th><th>In stock</th><th>Minimum</th><th>Status</th></tr></thead>
       <tbody>
-        ${INVENTORY.map(i => {
+        ${INVENTORY.map((i, idx) => {
           const pct = Math.min(100, Math.round(i.stock / Math.max(i.min, 1) * 100));
           const st = i.stock === 0 ? 'Out of stock' : i.stock < i.min ? 'Low stock' : 'Completed';
           return `
-          <tr class="${absClass(i.level)}">
+          <tr class="${absClass(i.level)}" ${idx === 0 ? guide('Read the stock bar', 'The bar compares what is on the shelf against the minimum you set. Orange means reorder soon, red means you have run out.') : ''}>
             <td class="td-label" data-label="Product">
               <div class="cell-stack"><span class="t-body-m">${i.name}</span>
                 <span class="sub">${absPill(i.level)}</span></div>
@@ -371,7 +376,8 @@ const Screens = {
         <button class="btn btn-primary"
           ${guide('Ask for access', 'This sends a request to your administrator. You keep working while it is reviewed.')}>
           Request access</button>
-        <button class="btn btn-ghost" id="invoices-call">Ask support</button>
+        <button class="btn btn-ghost" id="invoices-call"
+          ${guide('Ask Ontex directly', 'Opens a support call. A specialist can see the screen you are stuck on, with patient data hidden, and tell you what is missing.')}>Ask support</button>
       </div>
     </div>`;
   },
@@ -391,8 +397,8 @@ const Screens = {
     </div>
 
     <div class="grid-cards">
-      ${list.map(p => `
-        <article class="pcard ${absClass(p.level)}">
+      ${list.map((p, i) => `
+        <article class="pcard ${absClass(p.level)}" ${i === 0 ? guide('What a product card tells you', 'The border colour is the absorbency level and the pack size is what one order line contains. Open a card to add it to a patient item list.') : ''}>
           <div class="pcard-media">
             <span class="pcard-ph">${p.range}</span>
             <img src="assets/products/${p.img}.png" alt="" loading="lazy"
@@ -433,7 +439,8 @@ const Screens = {
           <div class="t-body-m">Customer number</div><div class="t-sm muted">ONX-4471-BE</div></div></div>
         <div class="setting"><div class="setting-main">
           <div class="t-body-m">Account manager</div><div class="t-sm muted">Tom Verbeke, Ontex</div></div>
-          <button class="btn btn-ghost btn-sm">Contact</button></div>
+          <button class="btn btn-ghost btn-sm"
+            ${guide('Reach your account manager', 'For contracts, pricing and new product ranges. For something broken or confusing in SERENE, use Call support instead — that reaches a technical specialist.')}>Contact</button></div>
         <div class="setting"><div class="setting-main">
           <div class="t-body-m">Sign out</div><div class="t-sm muted">On this device only</div></div>
           <button class="btn btn-ghost btn-sm">Sign out</button></div>
@@ -447,7 +454,8 @@ const Screens = {
       <div class="setting">
         <div class="setting-main">
           <div class="t-body-m">Guided help</div>
-          <div class="t-sm muted">Show a short video when you point at an important button</div>
+          <div class="t-sm muted">Show a short video when you point at an important button.
+            Saved for this device only</div>
         </div>
         <button class="switch ${Guide.enabled ? 'is-on' : ''}" id="set-guide"
           role="switch" aria-checked="${Guide.enabled}"><span></span></button>

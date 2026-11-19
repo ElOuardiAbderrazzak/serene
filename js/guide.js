@@ -80,6 +80,14 @@ const Guide = {
     sw.onclick = () => this.setEnabled(!this.enabled);
     this.syncSwitch();
 
+    /* The same switch also lives on the Settings screen, which is re-rendered
+       on every route change — so bind it by delegation rather than by id.
+       Without this the feature is a one-way door: turn it off in the popup
+       footer and the popup never opens again to turn it back on. */
+    document.addEventListener('click', e => {
+      if (e.target.closest('#set-guide')) { e.preventDefault(); this.setEnabled(!this.enabled); }
+    });
+
     this.video.addEventListener('playing', () => document.getElementById('guide-video').classList.add('is-playing'));
     this.video.addEventListener('pause',   () => document.getElementById('guide-video').classList.remove('is-playing'));
     this.video.addEventListener('error',   () => this.fallbackVideo());
@@ -91,6 +99,14 @@ const Guide = {
 
     const hm = document.getElementById('help-mode');
     if (hm) hm.onclick = () => this.toggleHelpMode();
+
+    /* Bound once, here — doing it inside open() stacked a new listener on
+       every hover, and the duplicates fought each other into a flicker.
+       Leaving the popup closes it; coming back into it cancels that. */
+    this.pop.addEventListener('mouseleave', () => {
+      if (!this.touch()) { clearTimeout(this.timer); this.timer = setTimeout(() => this.close(), 280); }
+    });
+    this.pop.addEventListener('mouseenter', () => clearTimeout(this.timer));
 
     window.addEventListener('resize', () => { if (this.target) this.position(); });
     window.addEventListener('scroll', () => { if (this.target) this.position(); }, true);
@@ -109,6 +125,8 @@ const Guide = {
     const sw = document.getElementById('guide-switch');
     sw.classList.toggle('is-on', this.enabled);
     sw.setAttribute('aria-checked', String(this.enabled));
+    const s = document.getElementById('set-guide');          // the Settings copy
+    if (s) { s.classList.toggle('is-on', this.enabled); s.setAttribute('aria-checked', String(this.enabled)); }
     document.getElementById('guide-hint').textContent =
       this.enabled ? (this.touch() ? 'Tap ? then a highlighted button' : 'Point at a button to see its tip')
                    : 'Turned off — nothing will pop up';
@@ -130,9 +148,13 @@ const Guide = {
       if (el.dataset.guideBound) return;
       el.dataset.guideBound = '1';
       el.addEventListener('mouseenter', () => {
-        if (!this.enabled || this.touch() || Call.active) return;
+        /* never while the call feature owns the screen — a tip opening over
+           the consent sheet would cover the one choice the caller has */
+        if (!this.enabled || this.touch() || Call.active || Call.isOverlayOwner) return;
         clearTimeout(this.timer);
-        this.timer = setTimeout(() => this.open(el), 320);
+        /* a deliberate pause: with a tip on most controls, a shorter delay
+           pops cards at you while you are just scanning the screen */
+        this.timer = setTimeout(() => this.open(el), 450);
       });
       /* leaving the target starts a short close timer; entering the popup cancels it,
          so you can travel from the button to the popup without it vanishing */
@@ -141,10 +163,13 @@ const Guide = {
         if (this.target === el && !this.touch()) this.timer = setTimeout(() => this.close(), 280);
       });
       el.addEventListener('click', e => {
+        clearTimeout(this.timer);      // you pressed it; you no longer need the tip
         if (!this.enabled) return;
         if (this.touch() && this.helpMode) { e.preventDefault(); e.stopPropagation(); this.open(el); }
+        else this.close();
       });
     });
+    this.syncSwitch();   // the Settings screen may have just been re-rendered
   },
 
   /* ---- open / close ---- */
@@ -159,10 +184,6 @@ const Guide = {
     this.scrim.classList.add('is-open');
     this.pop.classList.add('is-open');
     this.position();
-    this.pop.addEventListener('mouseleave', this._leave = () => {
-      if (!this.touch()) this.timer = setTimeout(() => this.close(), 260);
-    });
-    this.pop.addEventListener('mouseenter', () => clearTimeout(this.timer));
   },
 
   close(silent) {
@@ -172,7 +193,11 @@ const Guide = {
     this.pop.classList.remove('is-open');
     this.caret.classList.remove('is-open');
     this.scrim.classList.remove('is-open');
-    try { this.video.pause(); } catch (_) {}
+    /* stop the sound too — a closed card that is still talking is the worst
+       of both worlds */
+    try { this.video.pause(); this.video.currentTime = 0; } catch (_) {}
+    try { if (document.pictureInPictureElement === this.video) document.exitPictureInPicture(); } catch (_) {}
+    document.getElementById('guide-video').classList.remove('is-playing');
   },
 
   /* One clip is used for every tip — only the title and the text under it
