@@ -11,12 +11,21 @@ const patientById = id => PATIENTS.find(p => p.id === id);
 const productById = id => PRODUCTS.find(p => p.id === id);
 const initials = n => n.split(/\s+/).map(w => w[0]).slice(0, 2).join('').toUpperCase();
 
-/* a patient avatar — identifying, so it is redacted during a call */
-function pAvatar(p, size = 'md') {
-  const hue = (p.name.charCodeAt(0) * 7) % 360;
-  return `<span class="avatar avatar-${size}" data-sensitive
-    style="background:hsl(${hue} 42% 72%)">${initials(p.name)}</span>`;
+/* An avatar. `sensitive` marks it as personal data, which is what makes the
+   redaction layer cover it during a support call — true for patients, false
+   for the signed-in caregiver, whose identity the specialist is allowed to
+   see. Falls back to initials on a tint when there is no photo. */
+function avatarEl(person, size, sensitive) {
+  const hue = (person.name.charCodeAt(0) * 7) % 360;
+  const style = person.photo
+    ? `background-image:url('assets/people/${person.photo}.jpg')`
+    : `background:${person.brand ? 'var(--b600)' : `hsl(${hue} 42% 72%)`}`;
+  const label = person.photo ? '' : (person.initials || initials(person.name));
+  return `<span class="avatar avatar-${size}"${sensitive ? ' data-sensitive' : ''}
+    style="${style}">${label}</span>`;
 }
+const pAvatar  = (p, size = 'md') => avatarEl(p, size, true);
+const meAvatar = (size = 'sm') => avatarEl(Object.assign({ brand: true }, ME), size, false);
 const statusChip = s => `<span class="chip ${STATUS_CLASS[s] || ''}"><i class="dot"></i>${s}</span>`;
 
 /* guided-help hook: data-guide marks the element the tutorial explains */
@@ -48,7 +57,7 @@ function shell() {
         style="border-radius:999px">${icon('phone', 16)} Call support</button>
       <button class="icon-btn" aria-label="Notifications">${icon('bell', 18)}</button>
       <a class="user-chip" href="#/account">
-        <span class="avatar avatar-sm" style="background:var(--b600)">${ME.initials}</span>
+        ${meAvatar('sm')}
         <span class="cell-stack not-mobile">
           <span class="t-sm-m">${ME.name}</span>
           <span class="sub t-sm muted">Nurse</span>
@@ -64,7 +73,7 @@ function shell() {
         aria-label="Guided help">${icon('help', 18)}</button>
       <button class="icon-btn" aria-label="Notifications">${icon('bell', 18)}</button>
       <a class="user-chip" href="#/account" aria-label="Account">
-        <span class="avatar avatar-sm" style="background:var(--b600)">${ME.initials}</span>
+        ${meAvatar('sm')}
       </a>
     </header>
 
@@ -405,7 +414,7 @@ const Screens = {
     <div class="two-col">
       <section class="card">
         <div style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:28px 24px">
-          <span class="avatar avatar-xl" style="background:var(--b600)">${ME.initials}</span>
+          ${meAvatar('xl')}
           <div style="text-align:center">
             <div class="t-h2">${ME.name}</div>
             <div class="t-sm muted">${ME.org}</div>

@@ -63,19 +63,24 @@ const LEVELS = ['Normal', 'Plus', 'Extra', 'Extra Plus', 'Ultra', 'Super', 'Maxi
 const absClass = l => 'abs abs-' + String(l).toLowerCase().replace(/\s+/g, '');
 const absPill = l => `<span class="abs-pill ${absClass(l)}"><i class="dot"></i>${l}</span>`;
 
-/* ---------- the signed-in user ---------- */
-const ME = { name: 'An Vermeulen', role: 'Head caregiver', org: 'WZC Sint-Jozef, Kortrijk', initials: 'AV' };
+/* ---------- the signed-in user ----------
+   photo: drop a square image at assets/people/nurse.jpg and set
+   photo:'nurse' to use it. Left null, the app shows her initials. */
+const ME = { name: 'An Vermeulen', role: 'Head caregiver', org: 'WZC Sint-Jozef, Kortrijk',
+             initials: 'AV', photo: null };
 
-/* ---------- patients (everything here is personal data) ---------- */
+/* ---------- patients (everything here is personal data) ----------
+   `photo` points at assets/people/<photo>.jpg. Faces are personal data, so
+   the avatars carry data-sensitive and are covered during a support call. */
 const PATIENTS = [
-  { id:'p1', name:'Marie Dubois',      room:'204', age:78, visit:'Today at 09:30',     nurse:'An Vermeulen', level:'Extra Plus', status:'Scheduled', items:4 },
-  { id:'p2', name:'Jan Peeters',       room:'112', age:83, visit:'Today at 10:15',     nurse:'An Vermeulen', level:'Ultra',      status:'Scheduled', items:3 },
-  { id:'p3', name:'Luc Vandenberghe',  room:'115', age:69, visit:'Today at 11:00',     nurse:'Tom Claeys',   level:'Extra',      status:'Scheduled', items:5 },
-  { id:'p4', name:'Sofie Claes',       room:'221', age:74, visit:'Today at 13:30',     nurse:'Tom Claeys',   level:'Plus',       status:'Scheduled', items:2 },
-  { id:'p5', name:'Fatima El Amrani',  room:'308', age:71, visit:'Today at 14:45',     nurse:'An Vermeulen', level:'Super',      status:'Scheduled', items:4 },
-  { id:'p6', name:'Ahmed Benali',      room:'103', age:80, visit:'Fri 21 Nov at 09:00', nurse:'Lies Maes',   level:'Maxi',       status:'Completed', items:3 },
-  { id:'p7', name:'Greta Janssens',    room:'310', age:86, visit:'Fri 21 Nov at 10:30', nurse:'Lies Maes',   level:'Normal',     status:'Completed', items:2 },
-  { id:'p8', name:'Pieter De Smet',    room:'207', age:77, visit:'Fri 21 Nov at 11:15', nurse:'Tom Claeys',  level:'Extra',      status:'Completed', items:4 }
+  { id:'p1', name:'Marie Dubois',      room:'204', age:78, visit:'Today at 09:30',     nurse:'An Vermeulen', level:'Extra Plus', status:'Scheduled', items:4, photo:'p1-marie-dubois' },
+  { id:'p2', name:'Jan Peeters',       room:'112', age:83, visit:'Today at 10:15',     nurse:'An Vermeulen', level:'Ultra',      status:'Scheduled', items:3, photo:'p2-jan-peeters' },
+  { id:'p3', name:'Luc Vandenberghe',  room:'115', age:69, visit:'Today at 11:00',     nurse:'Tom Claeys',   level:'Extra',      status:'Scheduled', items:5, photo:'p3-luc-vandenberghe' },
+  { id:'p4', name:'Sofie Claes',       room:'221', age:74, visit:'Today at 13:30',     nurse:'Tom Claeys',   level:'Plus',       status:'Scheduled', items:2, photo:'p4-sofie-claes' },
+  { id:'p5', name:'Fatima El Amrani',  room:'308', age:71, visit:'Today at 14:45',     nurse:'An Vermeulen', level:'Super',      status:'Scheduled', items:4, photo:'p5-fatima-el-amrani' },
+  { id:'p6', name:'Ahmed Benali',      room:'103', age:80, visit:'Fri 21 Nov at 09:00', nurse:'Lies Maes',   level:'Maxi',       status:'Completed', items:3, photo:'p6-ahmed-benali' },
+  { id:'p7', name:'Greta Janssens',    room:'310', age:86, visit:'Fri 21 Nov at 10:30', nurse:'Lies Maes',   level:'Normal',     status:'Completed', items:2, photo:'p7-greta-janssens' },
+  { id:'p8', name:'Pieter De Smet',    room:'207', age:77, visit:'Fri 21 Nov at 11:15', nurse:'Tom Claeys',  level:'Extra',      status:'Completed', items:4, photo:'p8-pieter-de-smet' }
 ];
 
 /* ---------- products ---------- */

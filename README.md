@@ -21,7 +21,9 @@ js/guide.js         guided help
 js/call.js          the support call, caller side (incl. the redaction)
 js/agent.js         the support call, specialist side
 js/peerjs.min.js    vendored, so the site needs no CDN at runtime
-assets/             drop your product photos and tutorial clips here
+assets/products/    the twelve product shots, cut out onto transparency
+assets/people/      the eight patient portraits, square and face-centred
+assets/tutorial.mp4 the clip every guided-help tip plays
 ```
 
 **Breakpoints** — desktop ≥ 1180 px (sidebar), tablet 700–1179 px and mobile
@@ -168,17 +170,11 @@ There is no hover on a touch screen, so on tablet and phone the **?** in the
 app bar turns on help mode and the next tap on a highlighted control opens its
 tip instead of activating it.
 
-**Adding the video.** One clip is used for every tip — only the title and the
-sentence under the player change per button. Put your file here:
-
-```
-assets/tutorial.mp4
-```
-
-That is the only video the app looks for. Until it is there the player shows a
-placeholder rather than breaking, so the rest of the feature still demos. If
-you later want a different clip per screen, change `GUIDE_VIDEO` at the top of
-`js/data.js` into a lookup on `state.route`.
+**The video.** One clip is used for every tip — only the title and the sentence
+under the player change per button. It lives at `assets/tutorial.mp4`; swap
+that single file to change what every tip plays. If you later want a different
+clip per screen, change `GUIDE_VIDEO` at the top of `js/data.js` into a lookup
+on `state.route`.
 
 **Adding a tip to another button** — put three attributes on it, nothing else:
 
@@ -206,9 +202,21 @@ men-shaped             men-pants             rectangular
 To swap one, drop a PNG with the same name over it. A missing file falls back
 to a tinted placeholder rather than a broken image.
 
+## 7. People
+
+The eight patient portraits are in `assets/people/`, cropped square and
+centred on the face. They are wired up in `js/data.js` through each patient's
+`photo` field, and the avatars carry `data-sensitive`, so a face is covered in
+the shared picture exactly like a name is.
+
+The caregiver's own avatar shows her initials. Her identity is deliberately
+*not* redacted — the specialist needs to know who they are helping — so if you
+want a photo there, use one you have the rights to: save it square at
+`assets/people/nurse.jpg` and set `photo: 'nurse'` on `ME` in `js/data.js`.
+
 ---
 
-## 7. Known limits
+## 8. Known limits
 
 - **Chrome or Edge.** Safari does not support `getDisplayMedia` the same way
   and will not share a tab; Firefox has no `preferCurrentTab`, so it always
