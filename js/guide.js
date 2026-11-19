@@ -20,7 +20,8 @@ const Guide = {
           <button class="guide-close" id="guide-close" aria-label="Close">${icon('close', 16)}</button>
         </header>
         <div class="guide-video" id="guide-video">
-          <video id="guide-v" playsinline preload="metadata"></video>
+          <video id="guide-v" playsinline preload="metadata"
+                 poster="assets/tutorial-poster.jpg"></video>
           <div class="novideo" id="guide-novideo" hidden>
             ${icon('play', 22)}<span>Drop your clip at <b>assets/tutorial.mp4</b><br>to play it here</span>
           </div>
@@ -53,8 +54,15 @@ const Guide = {
     this.scrim.addEventListener('click', () => this.close());
     document.addEventListener('keydown', e => { if (e.key === 'Escape') this.close(); });
 
-    document.getElementById('guide-playbtn').onclick = () => this.play();
-    document.getElementById('guide-video').onclick = e => { if (e.target.closest('.guide-vctl')) return; this.play(); };
+    /* The play button sits inside the video container, which is itself a
+       click-to-play surface. Without stopping the bubble the click toggles
+       twice and nothing happens, so the button stops it and the container
+       ignores clicks that landed on a control. */
+    document.getElementById('guide-playbtn').onclick = e => { e.stopPropagation(); this.play(); };
+    document.getElementById('guide-video').onclick = e => {
+      if (e.target.closest('.guide-vctl') || e.target.closest('#guide-playbtn')) return;
+      this.play();
+    };
     document.getElementById('guide-pip').onclick = async e => {
       e.stopPropagation();
       try {
