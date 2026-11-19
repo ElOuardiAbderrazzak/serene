@@ -226,3 +226,11 @@ want a photo there, use one you have the rights to: save it square at
   data held in `js/data.js`. Nothing is stored anywhere; a refresh resets it.
 - Patient photos are drawn as coloured initials, so there is no real face in
   the prototype even before redaction.
+
+## 9. After you change a file
+
+GitHub Pages tells browsers to keep CSS and JS for about ten minutes, so a
+refresh can still show the old version. The script and style tags carry a
+`?v=` number for that reason — bump it in `index.html` and `agent.html`
+whenever you change a `.js` or `.css` file and everyone gets the new one
+immediately. Images and video are not affected; they are fetched by name.
