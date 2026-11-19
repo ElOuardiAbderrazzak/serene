@@ -54,8 +54,7 @@ function shell() {
         <h1 id="page-title"></h1><p id="page-sub"></p>
       </div>
       <button class="btn btn-primary btn-sm" id="call-support-desktop"
-        style="border-radius:999px"
-        ${guide('Call a specialist', 'Starts an audio call with Ontex support. You choose whether to share your screen, and patient data is hidden before anything is sent.')}>
+        style="border-radius:999px">
         ${icon('phone', 16)} Call support</button>
       <button class="icon-btn" aria-label="Notifications"
         ${guide('Notifications', 'Low stock, orders awaiting approval and visits that were not completed show up here.')}>${icon('bell', 18)}</button>
@@ -376,8 +375,7 @@ const Screens = {
         <button class="btn btn-primary"
           ${guide('Ask for access', 'This sends a request to your administrator. You keep working while it is reviewed.')}>
           Request access</button>
-        <button class="btn btn-ghost" id="invoices-call"
-          ${guide('Ask Ontex directly', 'Opens a support call. A specialist can see the screen you are stuck on, with patient data hidden, and tell you what is missing.')}>Ask support</button>
+        <button class="btn btn-ghost" id="invoices-call">Ask support</button>
       </div>
     </div>`;
   },
