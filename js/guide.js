@@ -22,9 +22,7 @@ const Guide = {
         <div class="guide-video" id="guide-video">
           <video id="guide-v" playsinline preload="metadata"
                  poster="assets/tutorial-poster.jpg"></video>
-          <div class="novideo" id="guide-novideo" hidden>
-            ${icon('play', 22)}<span>Drop your clip at <b>assets/tutorial.mp4</b><br>to play it here</span>
-          </div>
+          <div class="novideo" id="guide-novideo" hidden></div>
           <button class="guide-play" id="guide-playbtn" aria-label="Play">${icon('play', 20)}</button>
           <span class="guide-dur" id="guide-dur">0:10</span>
           <div class="guide-vctl">
